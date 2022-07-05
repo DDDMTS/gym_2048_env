@@ -1,3 +1,5 @@
+# This environment has a serious bug and should not be used for the time being.
+
 # gym_2048
 
 This is the Gym environment for the 2048 game.
