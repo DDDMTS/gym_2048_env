@@ -8,7 +8,7 @@ class Env2048(gym.Env):
     metadata = {"render_modes": ["human", "rgb_array"]}
 
     def __init__(self, high = 4, wide = 4, seed = None, invalid_move_warmup=16,
-                 invalid_move_threshold=0.1, penalty=-32,):
+                 invalid_move_threshold=0.1, penalty=-5,):
 
         self.__high = high
         self.__wide = wide
@@ -19,7 +19,7 @@ class Env2048(gym.Env):
 
         self.action_space = spaces.Discrete(4)
 
-        self.__score = 0
+        self.__score = -1
         self.__total_score = 0
         self.__step = 0
         self.__invalid_step = 0
@@ -48,7 +48,7 @@ class Env2048(gym.Env):
     def __move(self, action):
         '''This part of the code is used to apply move
         0: move up, 1: move down, 2: move left, 3: move right.'''
-        self.__score = 0
+        self.__score = -1
         if action == 0:
             self.__up()
         elif action == 1:
@@ -100,11 +100,12 @@ class Env2048(gym.Env):
         '''This part is to merge the same value if they are adjacent.'''
         for temp in range(1, len(row)):
             if (row[temp - 1] == row[temp]):
-                row[temp - 1] = row[temp - 1] * 2
-                self.__score += row[temp - 1]
-                row[temp] = 0
-                if(self.__max_block < row[temp - 1]):
-                    self.__max_block = row[temp - 1]
+                if(row[temp]):
+                    row[temp - 1] = row[temp - 1] * 2
+                    self.__score += np.log2(row[temp - 1])
+                    row[temp] = 0
+                    if(self.__max_block < row[temp - 1]):
+                        self.__max_block = row[temp - 1]
 
     def __check_move(self):
         '''This part is to check whether the move is valid or not.'''
@@ -128,7 +129,7 @@ class Env2048(gym.Env):
             return True, self.__score + self.__penalty
         elif (self.__max_block == 2048):
             '''check whether the max value is get the 2048 or not'''
-            return True, self.__score + 2048
+            return True, self.__score + 20
         elif(self.__no_rest):
             for row in self.__board:
                 for temp in range(1, len(row)):
@@ -142,11 +143,11 @@ class Env2048(gym.Env):
 
 
     def __create_ob(self):
-        temp_ob = np.zeros((self.__high, self.__wide, self.__deep_ob))
+        temp_ob = np.zeros((self.__high, self.__wide, self.__deep_ob),dtype=np.int32)
         for h in range(self.__high):
             for w in range(self.__wide):
                 if self.__board[h,w]:
-                    temp_ob[h,w,(int(np.log2(self.__board[h,w]))-1)] = 1
+                    temp_ob[h,w,(int(np.log2(self.__board[h,w]))-1)] = np.int32(1)
         return temp_ob
 
 
@@ -165,7 +166,7 @@ class Env2048(gym.Env):
         return(observation, float(reward), done, info)
 
     def reset(self):
-        self.__score = 0
+        self.__score = -1
         self.__total_score = 0
         self.__step = 0
         self.__invalid_step = 0
