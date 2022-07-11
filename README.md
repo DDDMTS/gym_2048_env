@@ -60,9 +60,11 @@ Rather than install it, because I didn't test this part :)
 
 # Simple model
 
-I tested this environment on Deep Q Learning using the [Stable Baselines3](https://github.com/DLR-RM/stable-baselines3) library. I ran 10M rounds and the process took me approximately 3 hours, the results are shown below. It is clear that the agent is still learning and the model has not reached the optimal situation.
+I tested this environment on Deep Q Learning using the [Stable Baselines3](https://github.com/DLR-RM/stable-baselines3) library. I ran approximately 25M rounds and the process took me approximately 57 hours, the results are shown below. There is a big difference between two evaluation metrics: Mean episode training length and (Evaluate) Mean episode length which is shown below. It is clear that the agent is still learning and the model has not reached the optimal situation.
 
-I ran 100 tests on the resulting model and achieved 2048 in 8 times, 1024 in 69 times, 512 in 19 times and 256 in 4 times.
+About the Custom_CNN.py document is a custom feature extractor, you can check the paper named [Playing game 2048 with deep convolutional neural networks trained by supervised learning](https://www.jstage.jst.go.jp/article/ipsjjip/27/0/27_340/_pdf) to get more information.
+
+I ran 100 tests on the resulting model and achieved 2048 in 12 times, 1024 in 62 times, 512 in 24 times and 256 in 2 times.
 
 You can run check_model.py to test the model, it will print a dict, the key of the dict is the maximum value of the episode, and the value of the dict is the number of episodes that get this value.
 
