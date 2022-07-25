@@ -1,9 +1,9 @@
 import gym
 from gym_2048.envs.env2048 import Env2048
-
 from stable_baselines3 import DQN
 from stable_baselines3.common.env_util import make_vec_env
 from stable_baselines3.common.vec_env import VecFrameStack
+
 oenv = make_vec_env(Env2048)
 env = VecFrameStack(oenv, n_stack=2)
 

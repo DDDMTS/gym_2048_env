@@ -10,6 +10,8 @@ This is the Gym environment for the 2048 game.
 |  Observation Low  |             0             |
 |      Import       | `gym.make("2048game-v0")` |
 
+![2048 game](./README_img/2048.gif)
+
 ## Description
 
 This is a clone of the game 2048, intended for use in reinforcement learning for agent training, the original 2048 game can be found [here](https://github.com/gabrielecirulli/2048).
@@ -60,11 +62,11 @@ Rather than install it, because I didn't test this part :)
 
 # Simple model
 
-I tested this environment on Deep Q Learning using the [Stable Baselines3](https://github.com/DLR-RM/stable-baselines3) library. I ran approximately 25M rounds and the process took me approximately 57 hours, the results are shown below. There is a big difference between two evaluation metrics: Mean episode training length and (Evaluate) Mean episode length which is shown below. It is clear that the agent is still learning and the model has not reached the optimal situation.
+I tested this environment on Deep Q Learning using the [Stable Baselines3](https://github.com/DLR-RM/stable-baselines3) library. I ran approximately 19.6M rounds and the process took me approximately 43 hours, the results are shown below. There is a big difference between two evaluation metrics: Mean episode training length and (Evaluate) Mean episode length which is shown below. It is clear that the agent is still learning and the model has not reached the optimal situation.
 
 About the Custom_CNN.py document is a custom feature extractor, you can check the paper named [Playing game 2048 with deep convolutional neural networks trained by supervised learning](https://www.jstage.jst.go.jp/article/ipsjjip/27/0/27_340/_pdf) to get more information.
 
-I ran 100 tests on the resulting model and achieved 2048 in 12 times, 1024 in 62 times, 512 in 24 times and 256 in 2 times.
+I ran 100 tests on the resulting model and achieved 2048 in 10 times, 1024 in 68 times, 512 in 20 times and 256 in 2 times.
 
 You can run check_model.py to test the model, it will print a dict, the key of the dict is the maximum value of the episode, and the value of the dict is the number of episodes that get this value.
 
@@ -97,10 +99,3 @@ Mean episode length on the testing environment. This and the following indicator
 Mean episodic reward (during evaluation)
 
 ![Mean episode length](./README_img/eval_mean_reward.svg)
-
-
-## Future work
-
-- Continue to test this environment using more algorithms and rounds.
-- Finish the rendering part for this environment.
-

@@ -1,14 +1,17 @@
 import gym
+import pygame
 from gym import spaces
-#import pygame
+from gym.utils import seeding
 import numpy as np
 
 
 class Env2048(gym.Env):
-    metadata = {"render_modes": ["human", "rgb_array"]}
+    metadata = {"render_modes": ["human", "rgb_array"], "render_fps": 4}
 
     def __init__(self, high = 4, wide = 4, seed = None, invalid_move_warmup=16,
                  invalid_move_threshold=0.1, penalty=-5,):
+
+        self.seed(seed)
 
         self.__high = high
         self.__wide = wide
@@ -33,15 +36,42 @@ class Env2048(gym.Env):
         self.__add_block()
         self.__add_block()
 
+        self.window_size = 512
         self.window = None
         self.clock = None
+        self.COLOUR = {
+            'bg': (187, 173, 160),
+            0: (204, 192, 179),
+            2: (238, 228, 218),
+            4: (237, 224, 200),
+            8: (242, 177, 121),
+            16: (245, 149, 99),
+            32: (246, 124, 95),
+            64: (246, 94, 59),
+            128: (237, 207, 114),
+            256: (237, 204, 97),
+            512: (237, 200, 80),
+            1024: (237, 197, 63),
+            2048: (237, 194, 46)
+        }
+
+    def seed(self, seed=None):
+        self.__np_random, seed = seeding.np_random(seed)
+        return [seed]
 
     def __add_block(self):
         '''This is used to add new blocks to the rest of the board.'''
         try:
             rest = np.argwhere(self.__board == 0)
-            choose = np.random.choice(len(rest))
+            choose = self.__np_random.choice(len(rest))
             self.__board[rest[choose][0],rest[choose][1]] = 2
+        except:
+            self.__no_rest = True
+
+    def __check_rest(self):
+        try:
+            rest = np.argwhere(self.__board == 0)
+            a = rest[0]
         except:
             self.__no_rest = True
 
@@ -130,8 +160,7 @@ class Env2048(gym.Env):
         elif (self.__max_block >= 2048):
             '''check whether the max value is get the 2048 or not'''
             return False, self.__score + 10
-        elif (self.__max_block == 2**(self.__deep_ob-1)):
-            '''check whether the max value is get the 2048 or not'''
+        elif (self.__max_block == 2 ** (self.__deep_ob - 1)):
             return True, self.__score + 1000
         elif(self.__no_rest):
             for row in self.__board:
@@ -142,10 +171,9 @@ class Env2048(gym.Env):
                 for temp in range(1, len(row)):
                     if (row[temp - 1] == row[temp]):
                         return False, self.__score
-            return True, self.__score + 1
+            return True, self.__score
         elif(self.__no_rest is False):
             return False, self.__score
-
 
     def __create_ob(self):
         temp_ob = np.zeros((self.__high, self.__wide,self.__deep_ob), dtype=np.uint8)
@@ -171,6 +199,7 @@ class Env2048(gym.Env):
         info["old_state"]=self.__board.copy()
         self.__move(action)
         self.__check_move()
+        self.__check_rest()
         done, reward = self.__check_state()
         info["step"] = self.__step
         info["new_state"] = self.__board.copy()
@@ -179,7 +208,9 @@ class Env2048(gym.Env):
         observation  = self.__create_ob()
         return(observation, float(reward), done, info)
 
-    def reset(self):
+    def reset(self, seed=None):
+        self.seed(seed)
+
         self.__score = 0
         self.__total_score = 0
         self.__step = 0
@@ -196,8 +227,65 @@ class Env2048(gym.Env):
         return observation
 
     def render(self, mode="human"):
-        pass
+        if self.window is None and mode == "human":
+            pygame.init()
+            pygame.display.init()
+            self.window = pygame.display.set_mode((self.window_size, self.window_size))
+        if self.clock is None and mode == "human":
+            self.clock = pygame.time.Clock()
+
+        canvas = pygame.Surface(((self.window_size, self.window_size)))
+        canvas.fill(self.COLOUR['bg'])
+        pygame.font.init()
+        myfont = pygame.font.SysFont('Comic Sans MS', 30)
+
+        for i in range(self.__high):
+            for j in range(self.__wide):
+                num = self.__board[i,j]
+
+                rect_x = int(j * self.window_size / self.__wide) + 10
+                rect_y = int(i * self.window_size / self.__wide) + 10
+                rect_w = int(self.window_size / self.__wide) - 2 * 10
+                rect_h = int(self.window_size / self.__wide) - 2 * 10
+
+                pygame.draw.rect(canvas,
+                                 self.COLOUR[num],
+                                 pygame.Rect(rect_x, rect_y, rect_w, rect_h),
+                                 border_radius=8)
+                if num == 0:
+                    continue
+                text_surface =myfont.render(f'{num}', True, (0, 0, 0))
+                text_rect = text_surface.get_rect(center=(rect_x + rect_w / 2,
+                                                          rect_y + rect_h / 2))
+                canvas.blit(text_surface, text_rect)
+
+        if mode == "human":
+            # The following line copies our drawings from `canvas` to the visible window
+            self.window.blit(canvas, canvas.get_rect())
+            pygame.event.pump()
+            pygame.display.update()
+
+            # We need to ensure that human-rendering occurs at the predefined framerate.
+            # The following line will automatically add a delay to keep the framerate stable.
+            self.clock.tick(self.metadata["render_fps"])
+        else:  # rgb_array
+            return np.transpose(
+                np.array(pygame.surfarray.pixels3d(canvas)), axes=(1, 0, 2)
+            )
+
+    def close(self):
+        if self.window is not None:
+            pygame.display.quit()
+            pygame.quit()
 
 
-    def set_boaed(self, board):
-        self.__board = board
+    def set_board(self, board):
+        if board.dtype != np.int32:
+            self.__board = board.astype(np.int32)
+        else:
+            self.__board = board
+        observation = self.__create_ob()
+        return observation
+
+    def get_board(self):
+        return self.__board
