@@ -35,8 +35,6 @@ There are a total of 4 modes of action.
 
 ## Observations
 
-**There is no graphical interface at the moment.**
-
 The observation space is (4, 4, 16). This can be thought of as a 4 by 4 pixels size image with 16 channels (unlike the traditional RGB image which has 3 channels).
 
 The encoding method is similar to one-hot encoding. If there is a block with the number n (n greater than 0), then the 0 channel number is 255, while the log2(n) channel is also 255 and the rest of the channels are 0.
