@@ -21,7 +21,6 @@ The game ends when your agent has made too many invalid moves (an invalid move m
 You can move all the blocks in four directions, up, down, left or right, and after each move, a random block will be created in the remaining position, with a number of 2. If there are adjacent blocks with the same number in the direction of the move, the two blocks will be merged into one block, and the new block will be twice the size of the original numbers.
 
 Each time the environment will give a reward when the blocks are merged.
-
 ## Action
 
 There are a total of 4 modes of action.
@@ -35,11 +34,13 @@ There are a total of 4 modes of action.
 
 ## Observations
 
-**There is no graphical interface at the moment.**
-
-The observation space is (4, 4, 16). This can be thought of as a 4 by 4 pixels size image with 16 channels (unlike the traditional RGB image which has 3 channels).
+The observation space is (4, 4, 16). This can be thought of as a 4 by 4 pixels size image with 16 channels (unlike the traditional RGB image which has 3 channels)[[1]](https://www.jstage.jst.go.jp/article/ipsjjip/27/0/27_340/_pdf).
 
 The encoding method is similar to one-hot encoding. If there is a block with the number n (n greater than 0), then the 0 channel number is 255, while the log2(n) channel is also 255 and the rest of the channels are 0.
+
+For a better description, there is an example, see the picture below. The header of the table represents the number of channels, 1st means the first channel in this position, 2nd means the second channel in this position, etc. If the number in this position is 0, all values of channels in this position are 0 (line 1). If the number in this position is 2, the 1st and 2nd channels are 255, other channels are 0 (line 2). If the number in this position is the 15th power of 2 (32768), the 1st and 16th channels are 255, other channels are 0 (line 3).
+
+![Example of observation space](./README_img/ob_ex.png)
 
 ## Rewards
 
@@ -68,7 +69,7 @@ About the Custom_CNN.py document is a custom feature extractor, you can check th
 
 I ran 100 tests on the resulting model and achieved 2048 in 10 times, 1024 in 68 times, 512 in 20 times and 256 in 2 times.
 
-You can run check_model.py to test the model, it will print a dict, the key of the dict is the maximum value of the episode, and the value of the dict is the number of episodes that get this value.
+You can run check_model.py to test the model (will cost a few minutes), it will print a dict, the key of the dict is the maximum value of the episode, and the value of the dict is the number of episodes that get this value.
 
 ## Mean episode training length
 

@@ -56,6 +56,7 @@ class Env2048(gym.Env):
         }
 
     def seed(self, seed=None):
+        '''This is used to add a random seed.'''
         self.__np_random, seed = seeding.np_random(seed)
         return [seed]
 
@@ -69,6 +70,7 @@ class Env2048(gym.Env):
             self.__no_rest = True
 
     def __check_rest(self):
+        '''This is used to check if there are any squares left on the board'''
         try:
             rest = np.argwhere(self.__board == 0)
             a = rest[0]
@@ -126,6 +128,7 @@ class Env2048(gym.Env):
                 flag = flag + 1
         for i in range(flag, len(row)):
             row[i] = 0
+
     def __merge(self, row):
         '''This part is to merge the same value if they are adjacent.'''
         for temp in range(1, len(row)):
@@ -150,8 +153,8 @@ class Env2048(gym.Env):
 
     def __check_state(self):
         '''This part is to check whether the game is ending or not.'''
-        '''For invalid move'''
 
+        '''For invalid move'''
         if(
             self.__invalid_step > self.__invalid_move_warmup and
             self.__invalid_step > self.__invalid_move_threshold * self.__step
@@ -176,6 +179,7 @@ class Env2048(gym.Env):
             return False, self.__score
 
     def __create_ob(self):
+        '''This is used to create observation space for the return'''
         temp_ob = np.zeros((self.__high, self.__wide,self.__deep_ob), dtype=np.uint8)
         for h in range(self.__high):
             for w in range(self.__wide):
@@ -185,15 +189,8 @@ class Env2048(gym.Env):
                     temp_ob[h, w,deep] = np.uint8(255)
         return temp_ob
 
-    def __get_info(self, old_state):
-        info = dict()
-        info["old_state"] = old_state
-        info["step"] = self.__step
-        info["new_state"] = self.__board.copy()
-        info["total_score"] = self.__total_score
-        info["max_block"] = self.__max_block
-
     def step(self, action):
+        '''This is used to do steps for agents.'''
         info = dict()
         self.__temp_board = self.__board.copy()
         info["old_state"]=self.__board.copy()
@@ -209,6 +206,7 @@ class Env2048(gym.Env):
         return(observation, float(reward), done, info)
 
     def reset(self, seed=None):
+        '''This is to reset this environment.'''
         self.seed(seed)
 
         self.__score = 0
@@ -227,6 +225,10 @@ class Env2048(gym.Env):
         return observation
 
     def render(self, mode="human"):
+        '''This is to render a graphical interface for the environment.
+        mode=="human"   return graphical interface
+        mode!="human"   return rgb array
+        '''
         if self.window is None and mode == "human":
             pygame.init()
             pygame.display.init()
@@ -260,13 +262,9 @@ class Env2048(gym.Env):
                 canvas.blit(text_surface, text_rect)
 
         if mode == "human":
-            # The following line copies our drawings from `canvas` to the visible window
             self.window.blit(canvas, canvas.get_rect())
             pygame.event.pump()
             pygame.display.update()
-
-            # We need to ensure that human-rendering occurs at the predefined framerate.
-            # The following line will automatically add a delay to keep the framerate stable.
             self.clock.tick(self.metadata["render_fps"])
         else:  # rgb_array
             return np.transpose(
@@ -274,18 +272,7 @@ class Env2048(gym.Env):
             )
 
     def close(self):
+        '''This is used to close render.'''
         if self.window is not None:
             pygame.display.quit()
             pygame.quit()
-
-
-    def set_board(self, board):
-        if board.dtype != np.int32:
-            self.__board = board.astype(np.int32)
-        else:
-            self.__board = board
-        observation = self.__create_ob()
-        return observation
-
-    def get_board(self):
-        return self.__board
